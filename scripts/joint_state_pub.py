@@ -51,4 +51,3 @@ if __name__ == '__main__':
         robot_sim.run()
     except rospy.ROSInterruptException:
         pass
-
