@@ -4,7 +4,6 @@ import rospy
 from geometry_msgs.msg import PoseStamped, Twist
 from std_msgs.msg import Float32
 
-
 class RobotSimulator:
     def __init__(self):
         rospy.init_node('robot_simulator', anonymous=True)

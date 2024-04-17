@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
 import rospy
-from geometry_msgs.msg import PoseStamped, Twist, TransformStamped
+from geometry_msgs.msg import PoseStamped, Twist
 from std_msgs.msg import Float32
 import numpy as np
 from math import cos, sin
 from sensor_msgs.msg import JointState
-from nav_msgs.msg import Odometry
-
 
 ra = .05
 b = 0.075
@@ -17,7 +15,6 @@ class RobotSimulator:
         
         
         rospy.Subscriber('/cmd_vel', Twist, self.cmd_vel_callback)
-        rospy.Subscriber('/odom', Odometry, self.cmd_vel_callback)
 
 
         self.wl_pub = rospy.Publisher('/wl', Float32, queue_size=10)
@@ -35,17 +32,6 @@ class RobotSimulator:
         self.rate = rospy.Rate(10)  # 10Hz
 
     def cmd_vel_callback(self, msg):
-        msg = Twist()
-        angular_vel = msg.angular.z
-        linear_vel = msg.linear.x
-        mat = np.array([ra/2, ra/2], [ra/(2*b), -ra/(2*b)])
-        inv_mat = np.linalg.inv(mat)
-        input = np.array([linear_vel, angular_vel])
-        [vel_r, vel_l] = np.matmul(inv_mat, input)
-        self.wl = vel_l
-        self.wr = vel_r
-chassis_joint
-    def odom(self, msg):
         msg = Twist()
         angular_vel = msg.angular.z
         linear_vel = msg.linear.x
