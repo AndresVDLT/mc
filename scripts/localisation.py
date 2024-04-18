@@ -19,6 +19,8 @@ class RobotSimulator:
         
         self.pose = Odometry()
         self.rate = rospy.Rate(10)  # 10Hz
+        self.wr = 0
+        self.wl = 0
         
 
     def cmd_wr_callback(self, msg):
