@@ -16,7 +16,7 @@ class RobotSimulator:
     def __init__(self):
         
         
-        rospy.Subscriber('/cmd_vel', Twist, self.cmd_vel_callback)
+        rospy.Subscriber('/cmd_vel', Twist, self.odom_callback)
         rospy.Subscriber('/odom', Odometry, self.cmd_vel_callback)
 
 
@@ -34,7 +34,7 @@ class RobotSimulator:
         self.pose = PoseStamped()
         self.rate = rospy.Rate(10)  # 10Hz
 
-    def cmd_vel_callback(self, msg):
+    def odom_callback(self, msg):
         msg = Twist()
         angular_vel = msg.angular.z
         linear_vel = msg.linear.x
