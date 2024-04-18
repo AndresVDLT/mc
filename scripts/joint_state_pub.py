@@ -13,9 +13,6 @@ class RobotSimulator:
         
         rospy.Subscriber('/odom', Odometry, self.odom_callback)
         self.joint_pub = rospy.Publisher('/joint_states', JointState, queue_size=10)
-        
-
-        self.odomMsg = Odometry()
         joint_state = JointState()
         joint_state.name = ['wheel_coupler_joint', 'wheel_coupler_joint_2']
         joint_state.effort = []
