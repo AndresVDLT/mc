@@ -6,6 +6,7 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32
 import numpy as np
 from tf import transformations
+from math import sin, cos
 
 class RobotSimulator:
     def __init__(self):
@@ -59,7 +60,7 @@ class RobotSimulator:
             odom.header.frame_id = "odom"
             odom.pose.pose.position.x = x
             odom.pose.pose.position.y = y
-            odom.pose.pose.orientation = transformations.quaternion_from_euler(o)
+            odom.pose.pose.orientation = transformations.quaternion_from_euler(0,0,o)
             odom.child_frame_id = "base_link"
             odom.twist.twist.angular.z = Vw[1]
             odom.twist.twist.linear.x = x_dot
