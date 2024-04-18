@@ -1,39 +1,71 @@
 #!/usr/bin/env python
 
 import rospy
-from geometry_msgs.msg import PoseStamped, Twist
+from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32
-
+import numpy as np
+from math import sin, cos
+from tf import transformations
 
 class RobotSimulator:
     def __init__(self):
         rospy.init_node('robot_simulator', anonymous=True)
         
-        self.pose_publisher = rospy.Publisher('/odom', PoseStamped, queue_size=10)
+        self.pose_publisher = rospy.Publisher('/odom', Odometry, queue_size=10)
 
-
+        # Suscribe to the robot's motor nodes
         rospy.Subscriber('/wl', Float32, self.cmd_wl_callback)
         rospy.Subscriber('/wr', Float32, self.cmd_wr_callback)
         
-        self.pose = PoseStamped()
-        
+        self.pose = Odometry()
         self.rate = rospy.Rate(10)  # 10Hz
+        
 
-    def cmd_vel_callback(self, msg):
-        # Implement the logic to control the robot based on Twist message
-        # For simplicity, let's just update the robot's pose based on linear and angular velocities
-        # Here, you would typically implement your robot's kinematics or dynamics model
-        # For this example, we'll just update the position based on velocity
-        self.pose.pose.position.x += msg.linear.x / 10.0  # Divide by 10.0 to scale the velocity
-        self.pose.pose.position.y += msg.linear.y / 10.0
-        self.pose.pose.s
+    def cmd_wr_callback(self, msg):
+        # Save the message in the variable named wr
+        self.wr = msg.data
 
-        self.pose.pose.orientation.w += msg.angular.z / 10.0  # Divide by 10.0 to scale the angular velocity
+    def cmd_wl_callback(self, msg):
+        # Save the message in the variable named wl
+        self.wl = msg.data
 
     def run(self):
+        x = 0
+        y = 0
+        o = 0
         while not rospy.is_shutdown():
+            # Update the timestamp of the pose
             self.pose.header.stamp = rospy.Time.now()
+            dt = 0.1
+            self.matA = np.array([
+                                [0.025, 0.025],
+                                [0.2632, -0.2632]
+                                ])
+            self.arr = np.array([self.wr, self.wl])
+
+            Vw = np.matmul(self.matA, self.arr)
+            y_dot =  Vw[0] * sin(o)
+            y +=  y_dot * dt
+            x_dot =  Vw[0] * cos(o)
+            x += x_dot * dt
+            o += Vw[1] * dt
+
+            #Creamos el msg
+            current_time = rospy.Time.now()
+            odom = Odometry()
+            odom.header.stamp = current_time
+            odom.header.frame_id = "odom"
+            odom.pose.pose.position.x = x
+            odom.pose.pose.position.y = y
+            odom.pose.pose.orientation = transformations.quaternion_from_euler(o)
+            odom.child_frame_id = "base_link"
+            odom.twist.twist.angular.z = Vw[1]
+            odom.twist.twist.linear.x = x_dot
+            odom.twist.twist.linear.y = y_dot
+            # Publish the pose
             self.pose_publisher.publish(self.pose)
+            # Sleep to maintain the specified rate
             self.rate.sleep()
 
 if __name__ == '__main__':
