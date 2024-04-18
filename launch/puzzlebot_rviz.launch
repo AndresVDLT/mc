@@ -10,5 +10,7 @@
 
         <arg name="rvizconfig" default="$(find localisation)/rviz/config.rviz"/>
         <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /> 
+
+        <node name="joint_state_pub" pkg="localisation" type="joint_state_pub.py"/>
         
 </launch>

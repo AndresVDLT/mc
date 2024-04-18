@@ -1,51 +1,50 @@
 #!/usr/bin/env python
 
 import rospy
-from geometry_msgs.msg import PoseStamped, Twist
-from std_msgs.msg import Float32
-import numpy as np
-from math import cos, sin
+from nav_msgs.msg import Odometry
+from sensor_msgs.msg import JointState
+from geometry_msgs.msg import TransformStamped
+import tf2_ros
+
 
 class RobotSimulator:
     def __init__(self):
         
         
-        rospy.Subscriber('/cmd_vel', Twist, self.cmd_vel_callback)
+        rospy.Subscriber('/odom', Odometry, self.odom_callback)
+        self.joint_pub = rospy.Publisher('/joint_states', JointState, queue_size=10)
+        joint_state = JointState()
+        joint_state.name = ['wheel_coupler_joint', 'wheel_coupler_joint_2']
+        joint_state.effort = []
+        joint_state.position = [0, 0]  
+        self.jointState = joint_state
 
-
-        rospy.Subscriber('/wl', Float32, self.cmd_wl_callback)
-        rospy.Subscriber('/wr', Float32, self.cmd_wr_callback)
-
-        self.wl = 0
-        self.wl = 0
-
-        self.x = 0
-        self.y = 0
-        self.psi = 0
-
-        
-        self.pose = PoseStamped()
-        self.rate = rospy.Rate(10)  # 10Hz
-
-    def cmd_vel_callback(self, msg):
-        msg = Twist()
-        angular_vel = msg.angular.z
-        linear_vel = msg.linear.x
-        ra = .05
-        b = 0.075
-        mat = np.array([ra/2, ra/2], [ra/(2*b), -ra/(2*b)])
-        inv_mat = np.linalg.inv(mat)
-        input = np.array([linear_vel, angular_vel])
-        [vel_r, vel_l] = np.matmul(inv_mat, input)
-        self.wl = vel_l
-        self.wr = vel_r
+    def odom_callback(self, msg):
+        # Update joint states
+        self.joint_state.header = msg.header  
+        self.joint_state.velocity = [msg.twist.twist.linear.x, msg.twist.twist.angular.z]
+        # Publish joint states
+        self.pub.publish(self.joint_state)
+        # Publish transform using tf2 (from 'odom' to 'base_link')
+        t = TransformStamped()
+        t.header.stamp = rospy.Time.now()
+        t.header.frame_id = "odom"
+        t.child_frame_id = "base_link"
+        t.transform.translation.x = msg.pose.pose.position.x
+        t.transform.translation.y = msg.pose.pose.position.y
+        t.transform.translation.z = 0.0
+        t.transform.rotation = msg.pose.pose.orientation
+         # Transform broadcaster
+        br = tf2_ros.TransformBroadcaster()
+        br.sendTransform(t) 
 
 
     def run(self):
-        while not rospy.is_shutdown():
-            self.wl +
+        rospy.spin()
+            
 
 if __name__ == '__main__':
+    rospy.init_node("joint_state_pub")
     try:
         robot_sim = RobotSimulator()
         robot_sim.run()
