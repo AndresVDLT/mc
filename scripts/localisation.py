@@ -8,6 +8,9 @@ import numpy as np
 from tf import transformations
 from math import sin, cos
 
+ra = .05
+b = 0.095
+
 class RobotSimulator:
     def __init__(self):
         rospy.init_node('robot_simulator', anonymous=True)
@@ -40,10 +43,9 @@ class RobotSimulator:
             # Update the timestamp of the pose
             self.pose.header.stamp = rospy.Time.now()
             dt = 0.1
-            self.matA = np.array([
-                                [0.025, 0.025],
-                                [0.2632, -0.2632]
-                                ])
+            
+
+            self.matA = np.array([ra/2, ra/2], [ra/(2*b), -ra/(2*b)])
             self.arr = np.array([self.wr, self.wl])
 
             Vw = np.matmul(self.matA, self.arr)

@@ -8,7 +8,7 @@ from math import cos, sin
 from sensor_msgs.msg import JointState
 
 ra = .05
-b = 0.075
+b = 0.095
 
 class RobotSimulator:
     def __init__(self):
