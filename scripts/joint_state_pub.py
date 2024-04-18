@@ -27,7 +27,7 @@ class RobotSimulator:
         self.joint_state.header = msg.header  
         self.joint_state.velocity = [msg.twist.twist.linear.x, msg.twist.twist.angular.z]
         # Publish joint states
-        self.pub.publish(joint_state)
+        self.pub.publish(self.joint_state)
         # Publish transform using tf2 (from 'odom' to 'base_link')
         t = TransformStamped()
         t.header.stamp = rospy.Time.now()
