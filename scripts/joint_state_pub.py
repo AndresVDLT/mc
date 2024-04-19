@@ -11,7 +11,7 @@ class RobotSimulator:
     def __init__(self):
         
         
-        rospy.Subscriber('/odometry', Odometry, self.odom_callback)
+        rospy.Subscriber('/odom', Odometry, self.odom_callback)
         self.joint_pub = rospy.Publisher('/joint_states', JointState, queue_size=10)
         joint_state = JointState()
         joint_state.name = ['leftWheel', 'rightWheel']
@@ -22,7 +22,6 @@ class RobotSimulator:
     def odom_callback(self, msg):
         # Update joint states
         self.joint_state.header = msg.header  
-        print("holaaaa")
         self.joint_state.velocity = [msg.twist.twist.linear.x, msg.twist.twist.angular.z]
         # Publish joint states
         self.joint_pub.publish(self.joint_state)

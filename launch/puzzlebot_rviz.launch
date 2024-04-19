@@ -13,7 +13,7 @@
 
         <node name="joint_state_pub" pkg="localisation" type="joint_state_pub.py" output="screen"/>
         <node name="talker" pkg="localisation" type="controler.py" />
-        <node name="localisation" pkg="localisation" type="localisation.py"/>
+        <node name="localisation" pkg="localisation" type="localisation.py" output="screen"/>
         <node name="cinematic" pkg="localisation" type="cinematic.py" />
 
 

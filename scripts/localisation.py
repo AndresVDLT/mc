@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Quaternion
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32
 import numpy as np
@@ -11,11 +11,31 @@ from math import sin, cos
 ra = .05
 b = 0.191/2
 
+def get_quaternion_from_euler(roll, pitch, yaw):
+    """
+    Convert an Euler angle to a quaternion.
+    
+    Input
+        :param roll: The roll (rotation around x-axis) angle in radians.
+        :param pitch: The pitch (rotation around y-axis) angle in radians.
+        :param yaw: The yaw (rotation around z-axis) angle in radians.
+    
+    Output
+        :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
+    """
+    qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+    qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
+    qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
+    qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+    
+    return [qx, qy, qz, qw]
+
+
 class Localisation:
     def __init__(self):
         rospy.init_node('localisation', anonymous=True)
         
-        self.pose_publisher = rospy.Publisher('/odometry', Odometry, queue_size=10)
+        self.pose_publisher = rospy.Publisher('/odom', Odometry, queue_size=10)
 
 
         # Suscribe to the robot's motor nodes
@@ -36,6 +56,7 @@ class Localisation:
         # Save the message in the variable named wl
         self.wl = msg.data
 
+    
     def run(self):
         x = 0
         y = 0
@@ -47,12 +68,13 @@ class Localisation:
             self.matA = np.array([[ra/2, ra/2], [ra/(2*b), -ra/(2*b)]])
             self.arr = np.array([self.wr, self.wl])
             Vw = np.matmul(self.matA, self.arr)
-            y_dot =  Vw[0] * sin(o)
+            y_dot =   sin(o) * Vw[0] 
             y +=  y_dot * dt
-            x_dot =  Vw[0] * cos(o)
+            x_dot =  1 * (Vw[0] * cos(o))
             x += x_dot * dt
-            o += Vw[1] * dt
-
+            o += dt * Vw[1]
+            quat = transformations.quaternion_from_euler(0,0,o)
+            quatNice = Quaternion(quat[0],quat[1],quat[2],quat[3])
             #Creamos el msg
             current_time = rospy.Time.now()
             odom = Odometry()
@@ -60,7 +82,7 @@ class Localisation:
             odom.header.frame_id = "odom"
             odom.pose.pose.position.x = x
             odom.pose.pose.position.y = y
-            odom.pose.pose.orientation = transformations.quaternion_from_euler(0,0,o)
+            odom.pose.pose.orientation = quatNice
             odom.child_frame_id = "base_link"
             odom.twist.twist.angular.z = Vw[1]
             odom.twist.twist.linear.x = x_dot
