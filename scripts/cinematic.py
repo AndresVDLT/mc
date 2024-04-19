@@ -18,9 +18,7 @@ class RobotSimulator:
 
 
         self.wl_pub = rospy.Publisher('/wl', Float32, queue_size=10)
-        self.wr_pub = rospy.Publisher('/wr', Float32, queue_size=10)
-
-        
+        self.wr_pub = rospy.Publisher('/wr', Float32, queue_size=10)        
 
         self.wl = 0
         self.wr = 0

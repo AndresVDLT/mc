@@ -18,6 +18,12 @@ class talker():
         self.x = 0
         self.y = 0
 
+        vel_msg = Twist()
+        vel_msg.linear.x =  0.2# Change this value to what you want
+        vel_msg.angular.z = 0.4 # Change this value to what you want
+        rospy.loginfo(vel_msg)
+        self.pub.publish(vel_msg)
+
     def odom_callback(self, msg):
         self.x = msg.pose.pose.position.x
         self.y = msg.pose.pose.position.y
@@ -29,10 +35,10 @@ class talker():
             ex = self.set_x - self.x
             ang = atan2(ey, ex)
             ed = sqrt(ex * ex + ey*ey)
-            eth = self.th - ang
+            eth = ang - self.th
             vel_msg = Twist()
-            vel_msg.linear.x =  ed * 0.1# Change this value to what you want
-            vel_msg.angular.z = eth * 0.1 # Change this value to what you want
+            vel_msg.linear.x =  ed * 0.2# Change this value to what you want
+            vel_msg.angular.z = eth * 0.4 # Change this value to what you want
             rospy.loginfo(vel_msg)
             self.pub.publish(vel_msg)
             self.rate.sleep()
