@@ -10,7 +10,7 @@ def talker():
     while not rospy.is_shutdown():
         vel_msg = Twist()
         vel_msg.linear.x = 0.5 # Change this value to what you want
-        vel_msg.angular.z = 2 # Change this value to what you want
+        vel_msg.angular.z = 0 # Change this value to what you want
         rospy.loginfo(vel_msg)
         pub.publish(vel_msg)
         rate.sleep()
