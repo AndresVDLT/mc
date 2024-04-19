@@ -9,13 +9,14 @@ from tf import transformations
 from math import sin, cos
 
 ra = .05
-b = 0.095
+b = 0.191/2
 
-class RobotSimulator:
+class Localisation:
     def __init__(self):
-        rospy.init_node('robot_simulator', anonymous=True)
+        rospy.init_node('localisation', anonymous=True)
         
         self.pose_publisher = rospy.Publisher('/odom', Odometry, queue_size=10)
+
 
         # Suscribe to the robot's motor nodes
         rospy.Subscriber('/wl', Float32, self.cmd_wl_callback)
@@ -44,11 +45,10 @@ class RobotSimulator:
             self.pose.header.stamp = rospy.Time.now()
             dt = 0.1
             
-
-            self.matA = np.array([ra/2, ra/2], [ra/(2*b), -ra/(2*b)])
+            self.matA = np.array([[ra/2, ra/2], [ra/(2*b), -ra/(2*b)]])
             self.arr = np.array([self.wr, self.wl])
-
             Vw = np.matmul(self.matA, self.arr)
+            print(Vw)
             y_dot =  Vw[0] * sin(o)
             y +=  y_dot * dt
             x_dot =  Vw[0] * cos(o)
@@ -74,7 +74,7 @@ class RobotSimulator:
 
 if __name__ == '__main__':
     try:
-        robot_sim = RobotSimulator()
+        robot_sim = Localisation()
         robot_sim.run()
     except rospy.ROSInterruptException:
         pass

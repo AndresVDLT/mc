@@ -11,10 +11,10 @@
         <arg name="rvizconfig" default="$(find localisation)/rviz/config.rviz"/>
         <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /> 
 
-        <node name="joint_state_pub" pkg="localisation" type="joint_state_pub.py"/>
-        <node name="controler" pkg="localisation" type="controler.py"/>
-        <node name="localisation" pkg="localisation" type="localisation.py"/>
-        <node name="cinematic" pkg="localisation" type="localisation.py"/>
+        <node name="joint_state_pub" pkg="localisation" type="joint_state_pub.py" />
+        <node name="talker" pkg="localisation" type="controler.py" />
+        <node name="localisation" pkg="localisation" type="localisation.py" output="screen"/>
+        <node name="cinematic" pkg="localisation" type="cinematic.py" output="screen"/>
 
 
         
