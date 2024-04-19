@@ -15,14 +15,14 @@ class Localisation:
     def __init__(self):
         rospy.init_node('localisation', anonymous=True)
         
-        self.pose_publisher = rospy.Publisher('/odom', Odometry, queue_size=10)
+        self.pose_publisher = rospy.Publisher('/odometry', Odometry, queue_size=10)
 
 
         # Suscribe to the robot's motor nodes
         rospy.Subscriber('/wl', Float32, self.cmd_wl_callback)
         rospy.Subscriber('/wr', Float32, self.cmd_wr_callback)
         
-        self.pose = Odometry()
+    
         self.rate = rospy.Rate(10)  # 10Hz
         self.wr = 0
         self.wl = 0
@@ -42,13 +42,11 @@ class Localisation:
         o = 0
         while not rospy.is_shutdown():
             # Update the timestamp of the pose
-            self.pose.header.stamp = rospy.Time.now()
             dt = 0.1
             
             self.matA = np.array([[ra/2, ra/2], [ra/(2*b), -ra/(2*b)]])
             self.arr = np.array([self.wr, self.wl])
             Vw = np.matmul(self.matA, self.arr)
-            print(Vw)
             y_dot =  Vw[0] * sin(o)
             y +=  y_dot * dt
             x_dot =  Vw[0] * cos(o)
@@ -68,7 +66,7 @@ class Localisation:
             odom.twist.twist.linear.x = x_dot
             odom.twist.twist.linear.y = y_dot
             # Publish the pose
-            self.pose_publisher.publish(self.pose)
+            self.pose_publisher.publish(odom)
             # Sleep to maintain the specified rate
             self.rate.sleep()
 

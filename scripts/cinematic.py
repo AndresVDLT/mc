@@ -36,8 +36,8 @@ class RobotSimulator:
         inv_mat = np.linalg.inv(mat)
         input = np.array([linear_vel, angular_vel])
         resultado = np.matmul(inv_mat, input)
-        self.wl = resultado[0]
-        self.wr = resultado[1] 
+        self.wl = resultado[1]
+        self.wr = resultado[0] 
 
 
     def run(self):
